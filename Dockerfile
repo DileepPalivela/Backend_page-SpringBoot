@@ -1,17 +1,17 @@
-# Use Java 17 (recommended for Spring Boot 3)
-FROM eclipse-temurin:17-jdk-alpine
+# Stage 1: Build
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 
-# Set working directory
 WORKDIR /app
 
-# Copy all project files
 COPY . .
 
-# Build the application
-RUN ./mvn clean package -DskipTests
+RUN mvn clean package -DskipTests
 
-# Expose port 8080
-EXPOSE 8080
+# Stage 2: Run
+FROM eclipse-temurin:17-jdk-alpine
 
-# Run the jar file
-CMD ["java", "-jar", "target/*.jar"]
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar app.jar
+
+CMD ["java", "-jar", "app.jar"]
